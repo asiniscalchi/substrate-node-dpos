@@ -36,6 +36,8 @@ jobs:
 
       - name: Rust Code Coverage
         uses: Swatinem/fucov@v1.0.0
+          with: 
+            args:
 
       - name: Check Build
         run: |
