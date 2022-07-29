@@ -45,6 +45,7 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
 pub use pallet_template;
+pub use pallet_dpos;
 
 /// An index to a block.
 pub type BlockNumber = u32;
