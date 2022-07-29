@@ -24,12 +24,10 @@ jobs:
         rustup target add wasm32-unknown-unknown --toolchain nightly
 
     - name: Test
-      run: |
-        cd pallets/pallet-dpos 
-        SKIP_WASM_BUILD=1 cargo test 
+      run: SKIP_WASM_BUILD=1 cargo test --release
    
-    # - name: Check Build
-    #   run: SKIP_WASM_BUILD=1 cargo check --release
+    - name: Check Build
+      run: SKIP_WASM_BUILD=1 cargo check --release
 
-    # - name: Check Build for Benchmarking
-    #   run: cargo check --features=runtime-benchmarks --release
+    - name: Check Build for Benchmarking
+      run: cargo check --features=runtime-benchmarks --release
