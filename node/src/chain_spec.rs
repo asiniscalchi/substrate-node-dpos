@@ -1,6 +1,6 @@
 use node_template_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
-	SystemConfig, WASM_BINARY,
+	AccountId, AuraConfig, BalancesConfig, GenesisConfig, SessionConfig, GrandpaConfig, Signature, SudoConfig,
+	SystemConfig, WASM_BINARY, opaque::SessionKeys,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -124,6 +124,24 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	))
 }
 
+fn session_keys(
+	aura: AuraId,
+	grandpa: GrandpaId,
+	// im_online: ImOnlineId,
+	// para_validator: ValidatorId,
+	// para_assignment: AssignmentId,
+	// authority_discovery: AuthorityDiscoveryId,
+) -> SessionKeys {
+	SessionKeys {
+		aura,
+		grandpa,
+		// im_online,
+		// para_validator,
+		// para_assignment,
+		// authority_discovery,
+	}
+}
+
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
@@ -140,6 +158,13 @@ fn testnet_genesis(
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
+		},
+		session: SessionConfig { 
+			keys: vec![(
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				session_keys(initial_authorities[0].0.clone(), initial_authorities[0].1.clone()),
+			)] 
 		},
 		aura: AuraConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
