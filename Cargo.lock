@@ -4012,13 +4012,17 @@ dependencies = [
 [[package]]
 name = "pallet-dpos"
 version = "0.0.1-dev"
-source = "git+https://github.com/asiniscalchi/pallet-dpos.git#e56777ebe24ae404933c2b3c02e80f2cdd7c714c"
+source = "git+https://github.com/asiniscalchi/pallet-dpos.git#d346add9dfdee96e0b66f64dbf2a694a016918b2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "log",
+ "pallet-session",
  "parity-scale-codec",
  "scale-info",
+ "sp-staking",
+ "sp-std",
 ]
 
 [[package]]
