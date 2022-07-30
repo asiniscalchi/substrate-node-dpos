@@ -23,6 +23,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use pallet_dpos;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
@@ -219,6 +220,10 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = (); // TODO: check
 }
 
+impl pallet_dpos::Config for Runtime {
+	type Event = Event;
+}
+
 impl pallet_grandpa::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
@@ -296,6 +301,7 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		Session: pallet_session,
+		Dpos: pallet_dpos,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 	}
