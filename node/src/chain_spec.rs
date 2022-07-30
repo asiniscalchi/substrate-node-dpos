@@ -50,8 +50,6 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"), // it's not really used because no sudo
 				// Pre-funded accounts
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -90,8 +88,6 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				wasm_binary,
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
-				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -128,7 +124,6 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 fn testnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
-	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	_enable_println: bool,
 ) -> GenesisConfig {
