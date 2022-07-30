@@ -217,16 +217,6 @@ impl pallet_session::Config for Runtime {
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type WeightInfo = (); // TODO: check
-
-	// // we don't have stash and controller, thus we don't need the convert as well.
-	// type ValidatorIdOf = (); // module_collator_selection::IdentityCollator;
-	// type ShouldEndSession = SessionManager;
-	// type NextSessionRotation = SessionManager;
-	// type SessionManager = CollatorSelection;
-	// // Essentially just Aura, but lets be pedantic.
-	// type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-	// type Keys = SessionKeys;
-	// type WeightInfo = ();
 }
 
 impl pallet_grandpa::Config for Runtime {

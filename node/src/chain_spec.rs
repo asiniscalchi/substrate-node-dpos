@@ -1,6 +1,6 @@
 use node_template_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, SessionConfig, GrandpaConfig, Signature, SudoConfig,
-	SystemConfig, WASM_BINARY, opaque::SessionKeys,
+	opaque::SessionKeys, AccountId, BalancesConfig, GenesisConfig, SessionConfig, Signature,
+	SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -159,19 +159,15 @@ fn testnet_genesis(
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		session: SessionConfig { 
+		session: SessionConfig {
 			keys: vec![(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				session_keys(initial_authorities[0].0.clone(), initial_authorities[0].1.clone()),
-			)] 
+			)],
 		},
-		aura: AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
-		},
-		grandpa: GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		},
+		aura: Default::default(),
+		grandpa: Default::default(),
 		sudo: SudoConfig {
 			// Assign network admin rights.
 			key: Some(root_key),
