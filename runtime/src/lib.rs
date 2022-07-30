@@ -211,7 +211,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = (); // TODO: check
 	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<10>, ConstU32<10>>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<ConstU32<10>, ConstU32<10>>;
-	type SessionManager = ();
+	type SessionManager = Dpos;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type WeightInfo = (); // TODO: check
