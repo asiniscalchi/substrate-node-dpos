@@ -43,9 +43,9 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_dpos;
 /// Import the template pallet.
 pub use pallet_template;
-pub use pallet_dpos;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -145,7 +145,30 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 }
 
-// Configure FRAME pallets to include in runtime.
+impl pallet_nicks::Config for Runtime {
+	// The Balances pallet implements the ReservableCurrency trait.
+	// `Balances` is defined in `construct_runtime!` macro.
+	type Currency = Balances;
+
+	// Set ReservationFee to a value.
+	type ReservationFee = ConstU128<100>;
+
+	// No action is taken when deposits are forfeited.
+	type Slashed = ();
+
+	// Configure the FRAME System Root origin as the Nick pallet admin.
+	// https://paritytech.github.io/substrate/master/frame_system/enum.RawOrigin.html#variant.Root
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+
+	// Set MinLength of nick name to a desired value.
+	type MinLength = ConstU32<8>;
+
+	// Set MaxLength of nick name to a desired value.
+	type MaxLength = ConstU32<32>;
+
+	// The ubiquitous event type.
+	type Event = Event;
+}
 
 impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
@@ -285,6 +308,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		Nicks: pallet_nicks,
 	}
 );
 

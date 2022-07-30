@@ -3776,6 +3776,7 @@ dependencies = [
  "pallet-balances",
  "pallet-dpos",
  "pallet-grandpa",
+ "pallet-nicks",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-template",
@@ -4040,6 +4041,20 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-nicks"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.26#e8a7d161f39db70cb27fdad6c6e215cf493ebc3b"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
  "sp-std",
 ]
 
