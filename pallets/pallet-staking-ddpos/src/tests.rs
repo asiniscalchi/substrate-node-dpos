@@ -1,5 +1,6 @@
 use crate::{mock::*, Config as MyConfig, Error, Event};
 use frame_support::{assert_noop, assert_ok};
+use pallet_session::SessionManager;
 
 #[test]
 fn bond_less_than_minimum_should_fail() {
@@ -55,14 +56,25 @@ fn bond_unbond_events() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
 
-		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));assert_eq!(
-			staking_events(),
-			vec![Event::Bonded(ALICE, 10)]
-		);
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+		assert_eq!(staking_events(), vec![Event::Bonded(ALICE, 10)]);
 		assert_ok!(Staking::unbond(Origin::signed(ALICE)));
-		assert_eq!(
-			staking_events(),
-			vec![Event::Bonded(ALICE, 10), Event::Unbonded(ALICE),]
-		);
+		assert_eq!(staking_events(), vec![Event::Bonded(ALICE, 10), Event::Unbonded(ALICE),]);
+	});
+}
+
+#[test]
+fn new_session_with_no_validators_should_return_none() {
+	new_test_ext().execute_with(|| {
+		assert!(Staking::new_session(0).is_none());
+	});
+}
+
+#[test]
+fn new_session_with_validators_should_return_validators() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+		assert_ok!(Staking::bond(Origin::signed(BOB), 10));
+		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
 	});
 }

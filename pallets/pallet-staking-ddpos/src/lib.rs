@@ -93,6 +93,7 @@ pub mod pallet {
 		/// governance (see `MinValidatorBond` and `MinNominatorBond`). If unbonding is the
 		/// intention, `chill` first to remove one's role as validator/nominator.
 		InsufficientBond,
+		BadState,
 	}
 
 	#[pallet::call]
@@ -149,23 +150,32 @@ pub mod pallet {
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {}", new_index);
-			// CurrentPlannedSession::<T>::put(new_index);
-			// Self::new_session(new_index, false)
-			None
+			let mut result: Vec<T::AccountId> = Vec::new();
+			for id in <Bonded<T>>::iter_keys() {
+				result.push(id);
+			}
+
+			if result.is_empty() {
+				return None
+			}
+
+			log!(info, "planning new session ids: {:?}", result);
+			Some(result)
 		}
+
 		fn new_session_genesis(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {} at genesis", new_index);
 			// CurrentPlannedSession::<T>::put(new_index);
 			// Self::new_session(new_index, true)
 			None
 		}
-		fn start_session(start_index: SessionIndex) {
-			log!(info, "starting session {}", start_index);
-			// Self::start_session(start_index)
-		}
 		fn end_session(end_index: SessionIndex) {
 			log!(info, "ending session {}", end_index);
 			// Self::end_session(end_index)
+		}
+		fn start_session(start_index: SessionIndex) {
+			log!(info, "starting session {}", start_index);
+			// Self::start_session(start_index)
 		}
 	}
 }
