@@ -78,7 +78,14 @@ impl pallet_staking_ddpos::Config for Test {
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 }
 
+pub const ALICE: u64 = 1;
+pub const BOB: u64 = 2;
+
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	let mut storage = system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let _ = pallet_balances::GenesisConfig::<Test> { balances: vec![(ALICE, 100), (BOB, 100)] }
+		.assimilate_storage(&mut storage);
+
+	storage.into()
 }

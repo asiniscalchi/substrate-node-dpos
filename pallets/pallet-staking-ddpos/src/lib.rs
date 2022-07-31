@@ -13,7 +13,6 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-
 pub(crate) const LOG_TARGET: &str = "runtime::dpos";
 
 // syntactic sugar for logging.
@@ -30,12 +29,14 @@ macro_rules! log {
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::{Currency, LockableCurrency};
+	use frame_support::traits::{Currency, LockableCurrency, LockIdentifier, WithdrawReasons};
 	use frame_system::pallet_prelude::*;
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
-	/// The balance type of this pallet.
+	const LOCK_ID: LockIdentifier = *b"dpos    ";
+
+/// The balance type of this pallet.
 	pub type BalanceOf<T> = <T as Config>::CurrencyBalance;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -123,6 +124,8 @@ pub mod pallet {
 			if value < T::Currency::minimum_balance() {
 				return Err(Error::<T>::InsufficientBond.into());
 			}
+			
+			T::Currency::set_lock(LOCK_ID, &stash, value, WithdrawReasons::RESERVE);
 
 			<Bonded<T>>::insert(&stash, &stash);
 
