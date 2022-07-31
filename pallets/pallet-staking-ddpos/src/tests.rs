@@ -1,20 +1,36 @@
-use crate::{mock::*, Error};
+use crate::{mock::*, Config as MyConfig, Error};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn it_works_for_default_value() {
+fn bond_less_than_minimum_should_fail() {
 	new_test_ext().execute_with(|| {
-		// Dispatch a signed extrinsic.
-		assert_ok!(Staking::do_something(Origin::signed(1), 42));
-		// Read pallet storage and assert an expected result.
-		assert_eq!(Staking::something(), Some(42));
+		let amount = ExistentialDeposit::get() - 1;
+		assert_noop!(Staking::bond(Origin::signed(ALICE), amount), Error::<Test>::InsufficientBond);
 	});
 }
 
 #[test]
-fn correct_error_for_none_value() {
+fn bond_equal_to_minimum_should_be_ok() {
 	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
-		assert_noop!(Staking::cause_error(Origin::signed(1)), Error::<Test>::NoneValue);
+		let amount = ExistentialDeposit::get();
+		assert_ok!(Staking::bond(Origin::signed(ALICE), amount));
+	});
+}
+
+
+#[test]
+fn bond_all_balance_should_succeed() {
+	new_test_ext().execute_with(|| {
+		let free_balance = <Test as MyConfig>::Currency::free_balance(&ALICE);
+		assert_ok!(Staking::bond(Origin::signed(ALICE), free_balance));
+	});
+}
+
+#[test]
+fn bond_twice_should_fail() {
+	new_test_ext().execute_with(|| {
+		let balance = 100;
+		assert_ok!(Staking::bond(Origin::signed(ALICE), balance));
+		assert_noop!(Staking::bond(Origin::signed(ALICE), balance), Error::<Test>::AlreadyBonded);
 	});
 }
