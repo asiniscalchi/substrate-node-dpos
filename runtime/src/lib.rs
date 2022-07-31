@@ -23,7 +23,6 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use pallet_session;
-use pallet_dpos;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
@@ -276,14 +275,10 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = (); // TODO: check
 	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<2>, ConstU32<3>>;
 	type NextSessionRotation = Self::ShouldEndSession;
-	type SessionManager = Dpos;
+	type SessionManager = Staking;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type WeightInfo = (); 
-}
-
-impl pallet_dpos::Config for Runtime {
-	type Event = Event;
 }
 
 impl pallet_staking_ddpos::Config for Runtime {
@@ -306,7 +301,6 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		Session: pallet_session,
-		Dpos: pallet_dpos,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 		Staking: pallet_staking_ddpos,
