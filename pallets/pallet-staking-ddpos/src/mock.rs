@@ -89,3 +89,11 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	storage.into()
 }
+
+pub fn staking_events() -> Vec<crate::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| if let Event::Staking(inner) = e { Some(inner) } else { None })
+		.collect()
+}
