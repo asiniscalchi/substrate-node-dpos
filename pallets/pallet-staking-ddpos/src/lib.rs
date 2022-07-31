@@ -78,7 +78,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// An account has bonded this amount.
 		Bonded(T::AccountId, BalanceOf<T>),
-		/// An account has unbonded 
+		/// An account has unbonded
 		Unbonded(T::AccountId),
 	}
 
@@ -129,13 +129,12 @@ pub mod pallet {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn unbond(origin: OriginFor<T>) -> DispatchResult {
 			let stash = ensure_signed(origin)?;
-			if !<Bonded<T>>::contains_key(&stash) {
+
+			if None == <Bonded<T>>::take(&stash) {
 				return Err(Error::<T>::NotStash.into());
 			}
 
 			T::Currency::remove_lock(STAKING_ID, &stash);
-			<Bonded<T>>::remove(&stash);
-
 			Self::deposit_event(Event::<T>::Unbonded(stash));
 
 			Ok(())
