@@ -34,3 +34,19 @@ fn bond_twice_should_fail() {
 		assert_noop!(Staking::bond(Origin::signed(ALICE), balance), Error::<Test>::AlreadyBonded);
 	});
 }
+
+#[test]
+fn unbond_the_unbounded_should_fail() {
+	new_test_ext().execute_with(|| {
+		assert_noop!(Staking::unbond(Origin::signed(ALICE)), Error::<Test>::NotStash);
+	});
+}
+
+#[test]
+fn bond_unbond_bond_should_succeed() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+		assert_ok!(Staking::unbond(Origin::signed(ALICE)));
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+	});
+}
