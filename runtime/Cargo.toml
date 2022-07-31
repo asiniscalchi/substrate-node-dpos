@@ -39,7 +39,6 @@ sp-std = { version = "4.0.0-dev", default-features = false, git = "https://githu
 sp-transaction-pool = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-version = { version = "5.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 pallet-session = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
-pallet-dpos = { default-features = false, git = "https://github.com/asiniscalchi/pallet-dpos.git" }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
@@ -77,7 +76,6 @@ std = [
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
 	"pallet-session/std",
-	"pallet-dpos/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
@@ -98,7 +96,6 @@ runtime-benchmarks = [
 	"hex-literal",
 	"pallet-balances/runtime-benchmarks",
 	"pallet-grandpa/runtime-benchmarks",
-	"pallet-dpos/runtime-benchmarks",
 	"pallet-template/runtime-benchmarks",
 	"pallet-staking-ddpos/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
@@ -113,7 +110,6 @@ try-runtime = [
 	"pallet-grandpa/try-runtime",
 	"pallet-randomness-collective-flip/try-runtime",
 	"pallet-sudo/try-runtime",
-	"pallet-dpos/try-runtime",
 	"pallet-session/try-runtime",
 	"pallet-template/try-runtime",
 	"pallet-staking-ddpos/try-runtime",

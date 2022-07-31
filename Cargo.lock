@@ -3801,7 +3801,6 @@ dependencies = [
  "hex-literal",
  "pallet-aura",
  "pallet-balances",
- "pallet-dpos",
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
  "pallet-session",
@@ -4035,22 +4034,6 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-dpos"
-version = "0.0.1-dev"
-source = "git+https://github.com/asiniscalchi/pallet-dpos.git#d346add9dfdee96e0b66f64dbf2a694a016918b2"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "pallet-session",
- "parity-scale-codec",
- "scale-info",
- "sp-staking",
  "sp-std",
 ]
 
