@@ -2,19 +2,17 @@ use crate::{mock::*, Error};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn it_works_for_default_value() {
+fn bond_less_than_minimum_should_raise_an_error() {
 	new_test_ext().execute_with(|| {
-		// Dispatch a signed extrinsic.
-		assert_ok!(Staking::do_something(Origin::signed(1), 42));
-		// Read pallet storage and assert an expected result.
-		assert_eq!(Staking::something(), Some(42));
+		let amount = ExistentialDeposit::get() - 1;
+		assert_noop!(Staking::bond(Origin::signed(1000), amount), Error::<Test>::InsufficientBond);
 	});
 }
 
 #[test]
-fn correct_error_for_none_value() {
+fn bond_equal_to_minimum_should_be_ok() {
 	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
-		assert_noop!(Staking::cause_error(Origin::signed(1)), Error::<Test>::NoneValue);
+		let amount = ExistentialDeposit::get();
+		assert_ok!(Staking::bond(Origin::signed(1000), amount));
 	});
 }
