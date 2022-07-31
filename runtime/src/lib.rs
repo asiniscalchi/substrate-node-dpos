@@ -9,7 +9,6 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
-use pallet_session;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -23,6 +22,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use pallet_session;
 use pallet_dpos;
 
 // A few exports that help ease life for downstream crates.
@@ -44,6 +44,9 @@ use pallet_transaction_payment::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
+
+/// Import the template pallet.
+pub use pallet_template;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -205,22 +208,6 @@ impl pallet_aura::Config for Runtime {
 	type MaxAuthorities = ConstU32<32>;
 }
 
-impl pallet_session::Config for Runtime {
-	type Event = Event;
-	type ValidatorId = <Self as frame_system::Config>::AccountId;
-	type ValidatorIdOf = (); // TODO: check
-	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<2>, ConstU32<3>>;
-	type NextSessionRotation = Self::ShouldEndSession;
-	type SessionManager = Dpos;
-	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-	type Keys = opaque::SessionKeys;
-	type WeightInfo = (); 
-}
-
-impl pallet_dpos::Config for Runtime {
-	type Event = Event;
-}
-
 impl pallet_grandpa::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
@@ -277,6 +264,27 @@ impl pallet_sudo::Config for Runtime {
 	type Call = Call;
 }
 
+/// Configure the pallet-template in pallets/template.
+impl pallet_template::Config for Runtime {
+	type Event = Event;
+}
+
+impl pallet_session::Config for Runtime {
+	type Event = Event;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	type ValidatorIdOf = (); // TODO: check
+	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<2>, ConstU32<3>>;
+	type NextSessionRotation = Self::ShouldEndSession;
+	type SessionManager = Dpos;
+	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type Keys = opaque::SessionKeys;
+	type WeightInfo = (); 
+}
+
+impl pallet_dpos::Config for Runtime {
+	type Event = Event;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -294,6 +302,8 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		Session: pallet_session,
 		Dpos: pallet_dpos,
+		// Include the custom logic from the pallet-template in the runtime.
+		TemplateModule: pallet_template,
 	}
 );
 
