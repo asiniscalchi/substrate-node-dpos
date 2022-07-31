@@ -35,3 +35,15 @@ fn bond_all_balance_should_fail() {
 		assert_noop!(Staking::bond(Origin::signed(account_id), balance), Error::<Test>::InsufficientBond);
 	});
 }
+
+#[test]
+fn bond_twice_should_fail() {
+	new_test_ext().execute_with(|| {
+		let account_id = 1;
+		let balance = 100;
+		assert_ok!(Staking::bond(Origin::signed(account_id), balance));
+		assert_noop!(Staking::bond(Origin::signed(account_id), balance), Error::<Test>::AlreadyBonded);
+	});
+}
+
+
