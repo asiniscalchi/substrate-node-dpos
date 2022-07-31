@@ -29,14 +29,14 @@ macro_rules! log {
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::{Currency, LockableCurrency, LockIdentifier, WithdrawReasons};
+	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
 	use frame_system::pallet_prelude::*;
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
 	const STAKING_ID: LockIdentifier = *b"staking ";
 
-/// The balance type of this pallet.
+	/// The balance type of this pallet.
 	pub type BalanceOf<T> = <T as Config>::CurrencyBalance;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -98,6 +98,8 @@ pub mod pallet {
 		NoneValue,
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
+		/// Not a stash account.
+		NotStash,
 		/// Stash is already bonded.
 		AlreadyBonded,
 		/// Cannot have a validator or nominator role, with value less than the minimum defined by
@@ -134,12 +136,21 @@ pub mod pallet {
 			Ok(())
 		}
 
-	// TODO #[pallet::weight(T::WeightInfo::unbond())]
-	#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-	pub fn unbond(origin: OriginFor<T>, #[pallet::compact] value: BalanceOf<T>) -> DispatchResult {
-			let controller = ensure_signed(origin)?;
-		Ok(())
-	}
+		// TODO #[pallet::weight(T::WeightInfo::unbond())]
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn unbond(
+			origin: OriginFor<T>,
+		) -> DispatchResult {
+			let stash = ensure_signed(origin)?;
+			if !<Bonded<T>>::contains_key(&stash) {
+				return Err(Error::<T>::NotStash.into());
+			}
+
+			T::Currency::remove_lock(STAKING_ID, &stash);
+			<Bonded<T>>::remove(&stash);
+
+			Ok(())
+		}
 	}
 
 	/// In this implementation `new_session(session)` must be called before `end_session(session-1)`
