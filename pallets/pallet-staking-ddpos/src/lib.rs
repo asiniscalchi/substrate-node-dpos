@@ -74,8 +74,12 @@ pub mod pallet {
 	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
 
 	#[pallet::event]
-	// #[pallet::generate_deposit(pub(super) fn deposit_event)]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
+		/// An account has bonded this amount.
+		Bonded(T::AccountId, BalanceOf<T>),
+		/// An account has unbonded 
+		Unbonded(T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -116,14 +120,14 @@ pub mod pallet {
 
 			<Bonded<T>>::insert(&stash, &());
 
+			Self::deposit_event(Event::<T>::Bonded(stash, value));
+
 			Ok(())
 		}
 
 		// TODO #[pallet::weight(T::WeightInfo::unbond())]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn unbond(
-			origin: OriginFor<T>,
-		) -> DispatchResult {
+		pub fn unbond(origin: OriginFor<T>) -> DispatchResult {
 			let stash = ensure_signed(origin)?;
 			if !<Bonded<T>>::contains_key(&stash) {
 				return Err(Error::<T>::NotStash.into());
@@ -131,6 +135,8 @@ pub mod pallet {
 
 			T::Currency::remove_lock(STAKING_ID, &stash);
 			<Bonded<T>>::remove(&stash);
+
+			Self::deposit_event(Event::<T>::Unbonded(stash));
 
 			Ok(())
 		}
