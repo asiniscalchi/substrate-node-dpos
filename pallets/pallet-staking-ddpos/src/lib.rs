@@ -119,7 +119,7 @@ pub mod pallet {
 			if <Bonded<T>>::contains_key(&stash) {
 				return Err(Error::<T>::AlreadyBonded.into());
 			}
-			
+
 			// Reject a bond which is considered to be _dust_.
 			if value < T::Currency::minimum_balance() {
 				return Err(Error::<T>::InsufficientBond.into());
@@ -133,6 +133,13 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+	// TODO #[pallet::weight(T::WeightInfo::unbond())]
+	#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+	pub fn unbond(origin: OriginFor<T>, #[pallet::compact] value: BalanceOf<T>) -> DispatchResult {
+			let controller = ensure_signed(origin)?;
+		Ok(())
+	}
 	}
 
 	/// In this implementation `new_session(session)` must be called before `end_session(session-1)`

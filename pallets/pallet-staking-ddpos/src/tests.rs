@@ -34,3 +34,11 @@ fn bond_twice_should_fail() {
 		assert_noop!(Staking::bond(Origin::signed(ALICE), balance), Error::<Test>::AlreadyBonded);
 	});
 }
+
+#[test]
+fn unbond_the_unbounded_should_fail() {
+	new_test_ext().execute_with(|| {
+		let account_id = 1;
+		assert_noop!(Staking::unbond(Origin::signed(account_id)), Error::<Test>::InsufficientBond);
+	});
+}
