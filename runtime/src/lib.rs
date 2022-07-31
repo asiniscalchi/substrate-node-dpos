@@ -214,7 +214,7 @@ impl pallet_session::Config for Runtime {
 	type SessionManager = Dpos;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
-	type WeightInfo = (); // TODO: check
+	type WeightInfo = (); 
 }
 
 impl pallet_dpos::Config for Runtime {
