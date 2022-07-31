@@ -34,7 +34,7 @@ pub mod pallet {
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
-	const LOCK_ID: LockIdentifier = *b"dpos    ";
+	const STAKING_ID: LockIdentifier = *b"staking ";
 
 /// The balance type of this pallet.
 	pub type BalanceOf<T> = <T as Config>::CurrencyBalance;
@@ -124,8 +124,10 @@ pub mod pallet {
 			if value < T::Currency::minimum_balance() {
 				return Err(Error::<T>::InsufficientBond.into());
 			}
-			
-			T::Currency::set_lock(LOCK_ID, &stash, value, WithdrawReasons::RESERVE);
+
+			let stash_balance = T::Currency::free_balance(&stash);
+			let value = value.min(stash_balance);
+			T::Currency::set_lock(STAKING_ID, &stash, value, WithdrawReasons::all());
 
 			<Bonded<T>>::insert(&stash, &stash);
 
