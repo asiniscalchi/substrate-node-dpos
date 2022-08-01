@@ -30,7 +30,7 @@ macro_rules! log {
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
-	use frame_system::pallet_prelude::*;
+	use frame_system::{pallet_prelude::*, ensure_root};
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
@@ -62,6 +62,9 @@ pub mod pallet {
 
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		#[pallet::constant]
+		type MinimumValidatorCount: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -72,6 +75,11 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn bonded)]
 	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
+
+	/// Minimum number of staking participants before emergency conditions are imposed.
+	#[pallet::storage]
+	#[pallet::getter(fn minimum_validator_count)]
+	pub type MinimumValidatorCount<T> = StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -93,6 +101,7 @@ pub mod pallet {
 		/// governance (see `MinValidatorBond` and `MinNominatorBond`). If unbonding is the
 		/// intention, `chill` first to remove one's role as validator/nominator.
 		InsufficientBond,
+		BadState,
 	}
 
 	#[pallet::call]
@@ -139,6 +148,13 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_minimum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
+			ensure_root(origin)?;
+			<MinimumValidatorCount<T>>::set(value);
+			Ok(())
+		}
 	}
 
 	/// In this implementation `new_session(session)` must be called before `end_session(session-1)`
@@ -149,23 +165,32 @@ pub mod pallet {
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {}", new_index);
-			// CurrentPlannedSession::<T>::put(new_index);
-			// Self::new_session(new_index, false)
-			None
+			let mut result: Vec<T::AccountId> = Vec::new();
+			for id in <Bonded<T>>::iter_keys() {
+				result.push(id);
+			}
+
+			if result.is_empty() {
+				return None
+			}
+
+			log!(info, "planning new session ids: {:?}", result);
+			Some(result)
 		}
+
 		fn new_session_genesis(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {} at genesis", new_index);
 			// CurrentPlannedSession::<T>::put(new_index);
 			// Self::new_session(new_index, true)
 			None
 		}
-		fn start_session(start_index: SessionIndex) {
-			log!(info, "starting session {}", start_index);
-			// Self::start_session(start_index)
-		}
 		fn end_session(end_index: SessionIndex) {
 			log!(info, "ending session {}", end_index);
 			// Self::end_session(end_index)
+		}
+		fn start_session(start_index: SessionIndex) {
+			log!(info, "starting session {}", start_index);
+			// Self::start_session(start_index)
 		}
 	}
 }

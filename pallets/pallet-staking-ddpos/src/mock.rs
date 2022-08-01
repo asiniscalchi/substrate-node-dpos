@@ -76,6 +76,7 @@ impl pallet_staking_ddpos::Config for Test {
 	type Event = Event;
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type MinimumValidatorCount = frame_support::traits::ConstU32<2>;
 }
 
 pub const ALICE: u64 = 1;

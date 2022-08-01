@@ -288,6 +288,7 @@ impl pallet_staking_ddpos::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
+	type MinimumValidatorCount = ConstU32<2>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -552,5 +553,18 @@ impl_runtime_apis! {
 		fn execute_block_no_check(block: Block) -> Weight {
 			Executive::execute_block_no_check(block)
 		}
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn call_size() {
+		assert!(
+			core::mem::size_of::<Call>() <= 230,
+			"size of Call is too big... try to Box some arguments"
+		);
 	}
 }
