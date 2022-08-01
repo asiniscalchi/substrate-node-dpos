@@ -555,11 +555,15 @@ impl_runtime_apis! {
 	}
 }
 
+#[cfg(test)]
+mod test {
+	use super::*;
 
-#[test]
-fn call_size() {
-	assert!(
-		core::mem::size_of::<Call>() <= 230, 
-		"size of Call is too big... try to Box some arguments"
-	);
+	#[test]
+	fn call_size() {
+		assert!(
+			core::mem::size_of::<Call>() <= 230,
+			"size of Call is too big... try to Box some arguments"
+		);
+	}
 }
