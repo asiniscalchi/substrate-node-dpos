@@ -1,4 +1,6 @@
-use crate::{mock::*, Config as MyConfig, Error, Event, MaximumValidatorCount, MinimumValidatorCount};
+use crate::{
+	mock::*, Config as MyConfig, Error, Event, MaximumValidatorCount, MinimumValidatorCount,
+};
 use frame_support::{assert_noop, assert_ok};
 use pallet_session::SessionManager;
 use sp_runtime::DispatchError;
@@ -87,7 +89,6 @@ fn minimum_validator_count_default() {
 	});
 }
 
-
 #[test]
 fn maximum_validator_count_default() {
 	new_test_ext().execute_with(|| {
@@ -98,19 +99,53 @@ fn maximum_validator_count_default() {
 #[test]
 fn set_minimum_validator_should_be_called_by_root() {
 	new_test_ext().execute_with(|| {
-		let counter = Staking::minimum_validator_count() ;
-		assert_noop!(Staking::set_minimum_validator_count(Origin::signed(ALICE), counter + 1), DispatchError::BadOrigin);
+		let counter = Staking::minimum_validator_count();
+		assert_noop!(
+			Staking::set_minimum_validator_count(Origin::signed(ALICE), counter + 1),
+			DispatchError::BadOrigin
+		);
 		assert_ok!(Staking::set_minimum_validator_count(Origin::root(), counter + 1));
-		assert_eq!(Staking::minimum_validator_count(), counter + 1 );
+		assert_eq!(Staking::minimum_validator_count(), counter + 1);
+	});
+}
+
+#[test]
+fn set_minimum_should_not_0_and_major_than_maximum() {
+	new_test_ext().execute_with(|| {
+		assert_noop!(
+			Staking::set_minimum_validator_count(Origin::root(), 0),
+			Error::<Test>::InvalidNumberOfNominations
+		);
+		let counter = Staking::maximum_validator_count();
+		assert_noop!(
+			Staking::set_minimum_validator_count(Origin::root(), counter + 1),
+			Error::<Test>::InvalidNumberOfNominations
+		);
+		assert_ok!(Staking::set_minimum_validator_count(Origin::root(), counter));
 	});
 }
 
 #[test]
 fn set_maximum_validator_should_be_called_by_root() {
 	new_test_ext().execute_with(|| {
-		let counter = Staking::maximum_validator_count() ;
-		assert_noop!(Staking::set_maximum_validator_count(Origin::signed(ALICE), counter + 1), DispatchError::BadOrigin);
+		let counter = Staking::maximum_validator_count();
+		assert_noop!(
+			Staking::set_maximum_validator_count(Origin::signed(ALICE), counter + 1),
+			DispatchError::BadOrigin
+		);
 		assert_ok!(Staking::set_maximum_validator_count(Origin::root(), counter + 1));
-		assert_eq!(Staking::maximum_validator_count(), counter + 1 );
+		assert_eq!(Staking::maximum_validator_count(), counter + 1);
+	});
+}
+
+#[test]
+fn set_maximum_should_not_be_minor_than_minimum() {
+	new_test_ext().execute_with(|| {
+		let counter = Staking::minimum_validator_count();
+		assert_noop!(
+			Staking::set_maximum_validator_count(Origin::root(), counter - 1),
+			Error::<Test>::InvalidNumberOfNominations
+		);
+		assert_ok!(Staking::set_maximum_validator_count(Origin::root(), counter));
 	});
 }
