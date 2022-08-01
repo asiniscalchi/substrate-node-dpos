@@ -78,3 +78,9 @@ fn new_session_with_validators_should_return_validators() {
 		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
 	});
 }
+
+fn minimum_validator_should_be_3() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Staking::minimum_validator_count(), 3);
+	});
+}
