@@ -30,7 +30,7 @@ macro_rules! log {
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
-	use frame_system::{pallet_prelude::*, ensure_root};
+	use frame_system::{ensure_root, pallet_prelude::*};
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
@@ -65,6 +65,9 @@ pub mod pallet {
 
 		#[pallet::constant]
 		type MinimumValidatorCount: Get<u32>;
+
+		#[pallet::constant]
+		type MaximumValidatorCount: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -79,7 +82,14 @@ pub mod pallet {
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
 	#[pallet::getter(fn minimum_validator_count)]
-	pub type MinimumValidatorCount<T> = StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
+	pub type MinimumValidatorCount<T> =
+		StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
+
+	/// Minimum number of staking participants before emergency conditions are imposed.
+	#[pallet::storage]
+	#[pallet::getter(fn maximum_validator_count)]
+	pub type MaximumValidatorCount<T> =
+		StorageValue<_, u32, ValueQuery, <T as Config>::MaximumValidatorCount>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -102,6 +112,8 @@ pub mod pallet {
 		/// intention, `chill` first to remove one's role as validator/nominator.
 		InsufficientBond,
 		BadState,
+		/// Invalid number of nominations.
+		InvalidNumberOfNominations,
 	}
 
 	#[pallet::call]
@@ -152,7 +164,20 @@ pub mod pallet {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn set_minimum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
 			ensure_root(origin)?;
+			if value == 0 || value > <MaximumValidatorCount<T>>::get() {
+				return Err(Error::<T>::InvalidNumberOfNominations.into());	
+			} 
 			<MinimumValidatorCount<T>>::set(value);
+			Ok(())
+		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_maximum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
+			ensure_root(origin)?;
+			if value < <MinimumValidatorCount<T>>::get() {
+				return Err(Error::<T>::InvalidNumberOfNominations.into());	
+			}
+			<MaximumValidatorCount<T>>::set(value);
 			Ok(())
 		}
 	}
