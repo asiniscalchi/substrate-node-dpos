@@ -170,7 +170,10 @@ pub mod pallet {
 				result.push(id);
 			}
 
-			if result.is_empty() {
+			let min_validator_count  = <MinimumValidatorCount<T>>::get();
+
+			if result.len() <  min_validator_count as usize {
+				log!(warn, "validators count less than the minimum {}", min_validator_count);
 				return None
 			}
 
