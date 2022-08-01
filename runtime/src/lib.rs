@@ -554,3 +554,12 @@ impl_runtime_apis! {
 		}
 	}
 }
+
+
+#[test]
+fn call_size() {
+	assert!(
+		core::mem::size_of::<Call>() <= 230, 
+		"size of Call is too big... try to Box some arguments"
+	);
+}
