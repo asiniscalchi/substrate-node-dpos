@@ -165,20 +165,17 @@ pub mod pallet {
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {}", new_index);
-			let mut result: Vec<T::AccountId> = Vec::new();
-			for id in <Bonded<T>>::iter_keys() {
-				result.push(id);
-			}
 
+			let winners: Vec<T::AccountId> = <Bonded<T>>::iter_keys().collect::<Vec<T::AccountId>>().try_into().unwrap();
 			let min_validator_count  = <MinimumValidatorCount<T>>::get();
 
-			if result.len() <  min_validator_count as usize {
+			if winners.len() <  min_validator_count as usize {
 				log!(warn, "validators count less than the minimum {}", min_validator_count);
 				return None
 			}
 
-			log!(info, "planning new session ids: {:?}", result);
-			Some(result)
+			log!(info, "planning new session ids: {:?}", winners);
+			Some(winners)
 		}
 
 		fn new_session_genesis(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
