@@ -30,7 +30,7 @@ macro_rules! log {
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
-	use frame_system::{pallet_prelude::*, ensure_root};
+	use frame_system::{ensure_root, pallet_prelude::*};
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
@@ -65,6 +65,9 @@ pub mod pallet {
 
 		#[pallet::constant]
 		type MinimumValidatorCount: Get<u32>;
+
+		#[pallet::constant]
+		type MaximumValidatorCount: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -79,7 +82,14 @@ pub mod pallet {
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
 	#[pallet::getter(fn minimum_validator_count)]
-	pub type MinimumValidatorCount<T> = StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
+	pub type MinimumValidatorCount<T> =
+		StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
+
+	/// Minimum number of staking participants before emergency conditions are imposed.
+	#[pallet::storage]
+	#[pallet::getter(fn maximum_validator_count)]
+	pub type MaximumValidatorCount<T> =
+		StorageValue<_, u32, ValueQuery, <T as Config>::MaximumValidatorCount>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -155,6 +165,13 @@ pub mod pallet {
 			<MinimumValidatorCount<T>>::set(value);
 			Ok(())
 		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_maximum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
+			ensure_root(origin)?;
+			<MaximumValidatorCount<T>>::set(value);
+			Ok(())
+		}
 	}
 
 	/// In this implementation `new_session(session)` must be called before `end_session(session-1)`
@@ -171,7 +188,7 @@ pub mod pallet {
 			}
 
 			if result.is_empty() {
-				return None
+				return None;
 			}
 
 			log!(info, "planning new session ids: {:?}", result);

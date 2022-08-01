@@ -1,4 +1,4 @@
-use crate::{mock::*, Config as MyConfig, Error, Event};
+use crate::{mock::*, Config as MyConfig, Error, Event, MaximumValidatorCount, MinimumValidatorCount};
 use frame_support::{assert_noop, assert_ok};
 use pallet_session::SessionManager;
 use sp_runtime::DispatchError;
@@ -81,9 +81,17 @@ fn new_session_with_validators_should_return_validators() {
 }
 
 #[test]
-fn minimum_validator_count_default_should_be_2() {
+fn minimum_validator_count_default() {
 	new_test_ext().execute_with(|| {
-		assert_eq!(Staking::minimum_validator_count(), 2);
+		assert_eq!(Staking::minimum_validator_count(), MinimumValidatorCount::<Test>::get());
+	});
+}
+
+
+#[test]
+fn maximum_validator_count_default() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Staking::maximum_validator_count(), MaximumValidatorCount::<Test>::get());
 	});
 }
 
@@ -94,5 +102,15 @@ fn set_minimum_validator_should_be_called_by_root() {
 		assert_noop!(Staking::set_minimum_validator_count(Origin::signed(ALICE), counter + 1), DispatchError::BadOrigin);
 		assert_ok!(Staking::set_minimum_validator_count(Origin::root(), counter + 1));
 		assert_eq!(Staking::minimum_validator_count(), counter + 1 );
+	});
+}
+
+#[test]
+fn set_maximum_validator_should_be_called_by_root() {
+	new_test_ext().execute_with(|| {
+		let counter = Staking::maximum_validator_count() ;
+		assert_noop!(Staking::set_maximum_validator_count(Origin::signed(ALICE), counter + 1), DispatchError::BadOrigin);
+		assert_ok!(Staking::set_maximum_validator_count(Origin::root(), counter + 1));
+		assert_eq!(Staking::maximum_validator_count(), counter + 1 );
 	});
 }
