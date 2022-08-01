@@ -82,6 +82,7 @@ impl pallet_staking_ddpos::Config for Test {
 
 pub const ALICE: u64 = 1;
 pub const BOB: u64 = 2;
+pub const CHARLIE: u64 = 3;
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {

@@ -76,7 +76,9 @@ fn new_session_with_no_validators_should_return_none() {
 #[test]
 fn new_session_with_validators_should_return_validators() {
 	new_test_ext().execute_with(|| {
+		assert_eq!(Staking::new_session(0), None);
 		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+		assert_eq!(Staking::new_session(0), Some(vec![ALICE]));
 		assert_ok!(Staking::bond(Origin::signed(BOB), 10));
 		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
 	});
