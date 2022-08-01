@@ -71,33 +71,20 @@ pub mod pallet {
 	/// Map from all locked "stash" accounts to the controller account.
 	#[pallet::storage]
 	#[pallet::getter(fn bonded)]
-	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, T::AccountId>;
+	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
 
-	// The pallet's runtime storage items.
-	// https://docs.substrate.io/v3/runtime/storage
-	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
-
-	// Pallets use events to inform users when important changes are made.
-	// https://docs.substrate.io/v3/runtime/events-and-errors
 	#[pallet::event]
-	// #[pallet::generate_deposit(pub(super) fn deposit_event)]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(u32, T::AccountId),
+		/// An account has bonded this amount.
+		Bonded(T::AccountId, BalanceOf<T>),
+		/// An account has unbonded
+		Unbonded(T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
 		/// Not a stash account.
 		NotStash,
 		/// Stash is already bonded.
@@ -131,23 +118,24 @@ pub mod pallet {
 			let value = value.min(stash_balance);
 			T::Currency::set_lock(STAKING_ID, &stash, value, WithdrawReasons::all());
 
-			<Bonded<T>>::insert(&stash, &stash);
+			<Bonded<T>>::insert(&stash, &());
+
+			Self::deposit_event(Event::<T>::Bonded(stash, value));
 
 			Ok(())
 		}
 
 		// TODO #[pallet::weight(T::WeightInfo::unbond())]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn unbond(
-			origin: OriginFor<T>,
-		) -> DispatchResult {
+		pub fn unbond(origin: OriginFor<T>) -> DispatchResult {
 			let stash = ensure_signed(origin)?;
-			if !<Bonded<T>>::contains_key(&stash) {
+
+			if None == <Bonded<T>>::take(&stash) {
 				return Err(Error::<T>::NotStash.into());
 			}
 
 			T::Currency::remove_lock(STAKING_ID, &stash);
-			<Bonded<T>>::remove(&stash);
+			Self::deposit_event(Event::<T>::Unbonded(stash));
 
 			Ok(())
 		}

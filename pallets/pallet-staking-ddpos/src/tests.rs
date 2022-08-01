@@ -1,4 +1,4 @@
-use crate::{mock::*, Config as MyConfig, Error};
+use crate::{mock::*, Config as MyConfig, Error, Event};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
@@ -16,7 +16,6 @@ fn bond_equal_to_minimum_should_be_ok() {
 		assert_ok!(Staking::bond(Origin::signed(ALICE), amount));
 	});
 }
-
 
 #[test]
 fn bond_all_balance_should_succeed() {
@@ -48,5 +47,22 @@ fn bond_unbond_bond_should_succeed() {
 		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
 		assert_ok!(Staking::unbond(Origin::signed(ALICE)));
 		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));
+	});
+}
+
+#[test]
+fn bond_unbond_events() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 10));assert_eq!(
+			staking_events(),
+			vec![Event::Bonded(ALICE, 10)]
+		);
+		assert_ok!(Staking::unbond(Origin::signed(ALICE)));
+		assert_eq!(
+			staking_events(),
+			vec![Event::Bonded(ALICE, 10), Event::Unbonded(ALICE),]
+		);
 	});
 }
