@@ -30,7 +30,7 @@ macro_rules! log {
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
-	use frame_system::pallet_prelude::*;
+	use frame_system::{pallet_prelude::*, ensure_root};
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
 
@@ -62,6 +62,9 @@ pub mod pallet {
 
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		#[pallet::constant]
+		type MinimumValidatorCount: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -72,6 +75,11 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn bonded)]
 	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
+
+	/// Minimum number of staking participants before emergency conditions are imposed.
+	#[pallet::storage]
+	#[pallet::getter(fn minimum_validator_count)]
+	pub type MinimumValidatorCount<T> = StorageValue<_, u32, ValueQuery, <T as Config>::MinimumValidatorCount>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -138,6 +146,13 @@ pub mod pallet {
 			T::Currency::remove_lock(STAKING_ID, &stash);
 			Self::deposit_event(Event::<T>::Unbonded(stash));
 
+			Ok(())
+		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn set_minimum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
+			ensure_root(origin)?;
+			<MinimumValidatorCount<T>>::set(value);
 			Ok(())
 		}
 	}

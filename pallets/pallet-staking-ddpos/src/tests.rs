@@ -1,6 +1,7 @@
 use crate::{mock::*, Config as MyConfig, Error, Event};
 use frame_support::{assert_noop, assert_ok};
 use pallet_session::SessionManager;
+use sp_runtime::DispatchError;
 
 #[test]
 fn bond_less_than_minimum_should_fail() {
@@ -79,8 +80,19 @@ fn new_session_with_validators_should_return_validators() {
 	});
 }
 
-fn minimum_validator_should_be_3() {
+#[test]
+fn minimum_validator_count_default_should_be_2() {
 	new_test_ext().execute_with(|| {
-		assert_eq!(Staking::minimum_validator_count(), 3);
+		assert_eq!(Staking::minimum_validator_count(), 2);
+	});
+}
+
+#[test]
+fn set_minimum_validator_should_be_called_by_root() {
+	new_test_ext().execute_with(|| {
+		let counter = Staking::minimum_validator_count() ;
+		assert_noop!(Staking::set_minimum_validator_count(Origin::signed(ALICE), counter + 1), DispatchError::BadOrigin);
+		assert_ok!(Staking::set_minimum_validator_count(Origin::root(), counter + 1));
+		assert_eq!(Staking::minimum_validator_count(), counter + 1 );
 	});
 }
