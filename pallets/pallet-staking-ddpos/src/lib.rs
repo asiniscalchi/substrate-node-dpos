@@ -112,8 +112,8 @@ pub mod pallet {
 		/// intention, `chill` first to remove one's role as validator/nominator.
 		InsufficientBond,
 		BadState,
-		/// Invalid number of nominations.
-		InvalidNumberOfNominations,
+		/// Invalid number of validators.
+		InvalidNumberOfValidators,
 	}
 
 	#[pallet::call]
@@ -170,7 +170,7 @@ pub mod pallet {
 		pub fn set_minimum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
 			ensure_root(origin)?;
 			if value == 0 || value > <MaximumValidatorCount<T>>::get() {
-				return Err(Error::<T>::InvalidNumberOfNominations.into());
+				return Err(Error::<T>::InvalidNumberOfValidators.into());
 			}
 			<MinimumValidatorCount<T>>::set(value);
 			Ok(())
@@ -180,7 +180,7 @@ pub mod pallet {
 		pub fn set_maximum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
 			ensure_root(origin)?;
 			if value < <MinimumValidatorCount<T>>::get() {
-				return Err(Error::<T>::InvalidNumberOfNominations.into());
+				return Err(Error::<T>::InvalidNumberOfValidators.into());
 			}
 			<MaximumValidatorCount<T>>::set(value);
 			Ok(())
