@@ -195,7 +195,6 @@ pub mod pallet {
 			let max_validator_count  = <MaximumValidatorCount<T>>::get();
 
 			let mut ciao: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
-			println!("{:?}", ciao);
 			ciao.sort_by(|a, b| b.1.cmp(&a.1));
 			ciao.truncate(max_validator_count as usize);
 
