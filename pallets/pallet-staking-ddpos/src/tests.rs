@@ -177,9 +177,9 @@ fn new_session_should_return_the_winners() {
 }
 
 #[test]
-fn validators_should_not_vote() {
+fn users_should_vote_once() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::bond(Origin::signed(ALICE), 50));
-		assert_noop!(Staking::vote(Origin::signed(ALICE), BOB), Error::<Test>::AlreadyVoted);
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_noop!(Staking::vote(Origin::signed(ALICE), CHARLIE), Error::<Test>::AlreadyVoted);
 	});
 }

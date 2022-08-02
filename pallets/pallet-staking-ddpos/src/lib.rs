@@ -79,6 +79,11 @@ pub mod pallet {
 	#[pallet::getter(fn bonded)]
 	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
 
+	/// Map from all locked "stash" accounts to the controller account.
+	#[pallet::storage]
+	#[pallet::getter(fn voted)]
+	pub type Voted<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
+
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
 	#[pallet::getter(fn minimum_validator_count)]
@@ -191,7 +196,13 @@ pub mod pallet {
 		// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn vote(origin: OriginFor<T>, target: T::AccountId) -> DispatchResult {
-			let controller = ensure_signed(origin)?;
+			let voter = ensure_signed(origin)?;
+
+			if <Voted<T>>::contains_key(&voter) {
+				return Err(Error::<T>::AlreadyVoted.into());
+			}
+
+			<Voted<T>>::insert(&voter, ());
 
 			Ok(())
 		}
