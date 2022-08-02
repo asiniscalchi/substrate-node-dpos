@@ -188,14 +188,11 @@ pub mod pallet {
 			Ok(())
 		}
 
-// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
+		// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn vote(
-			origin: OriginFor<T>,
-			target: T::AccountId,
-		) -> DispatchResult {
+		pub fn vote(origin: OriginFor<T>, target: T::AccountId) -> DispatchResult {
 			let controller = ensure_signed(origin)?;
-			 
+
 			Ok(())
 		}
 	}
