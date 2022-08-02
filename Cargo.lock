@@ -3806,7 +3806,6 @@ dependencies = [
  "pallet-session",
  "pallet-staking-ddpos",
  "pallet-sudo",
- "pallet-template",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
