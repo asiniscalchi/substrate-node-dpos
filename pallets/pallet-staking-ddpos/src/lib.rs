@@ -189,14 +189,14 @@ pub mod pallet {
 	/// some session can lag in between the newest session planned and the latest session started.
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
-			log!(info, "planning new session {}", new_index);
+			log!(debug, "planning new session {}", new_index);
 
 			let min_validator_count  = <MinimumValidatorCount<T>>::get();
 			let max_validator_count  = <MaximumValidatorCount<T>>::get();
 
 			let mut validators: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
 			if validators.len() <  min_validator_count as usize {
-				log!(warn, "validators count {} less than the minimum {}", validators.len(), min_validator_count);
+				log!(warn, "validators count {} less than the minimum {} ... skip", validators.len(), min_validator_count);
 				return None
 			}
 
@@ -208,23 +208,15 @@ pub mod pallet {
 				winners.push(i.0);
 			}
 
-			log!(info, "planning new session ids: {:?}", winners);
 			Some(winners)
 		}
 
-		fn new_session_genesis(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
-			log!(info, "planning new session {} at genesis", new_index);
-			// CurrentPlannedSession::<T>::put(new_index);
-			// Self::new_session(new_index, true)
-			None
-		}
 		fn end_session(end_index: SessionIndex) {
-			log!(info, "ending session {}", end_index);
-			// Self::end_session(end_index)
+			log!(debug, "ending session {}", end_index);
 		}
+
 		fn start_session(start_index: SessionIndex) {
-			log!(info, "starting session {}", start_index);
-			// Self::start_session(start_index)
+			log!(debug, "starting session {}", start_index);
 		}
 	}
 }

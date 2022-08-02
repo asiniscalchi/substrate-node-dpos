@@ -269,7 +269,7 @@ impl pallet_session::Config for Runtime {
 	type Event = Event;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
 	type ValidatorIdOf = (); // TODO: check
-	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<2>, ConstU32<3>>;
+	type ShouldEndSession = pallet_session::PeriodicSessions<ConstU32<5>, ConstU32<3>>;
 	type NextSessionRotation = Self::ShouldEndSession;
 	type SessionManager = Staking;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
