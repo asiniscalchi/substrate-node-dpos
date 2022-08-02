@@ -151,3 +151,15 @@ fn set_maximum_should_not_be_minor_than_minimum() {
 		assert_ok!(Staking::set_maximum_validator_count(Origin::root(), counter));
 	});
 }
+
+#[test]
+fn new_session_should_return_at_maximum_maximum_validator() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Staking::maximum_validator_count(), 2);
+		assert_ok!(Staking::bond(Origin::signed(1), 10));
+		assert_ok!(Staking::bond(Origin::signed(2), 10));
+		assert_ok!(Staking::bond(Origin::signed(3), 10));
+		let validators = Staking::new_session(1).unwrap();
+		assert_eq!(validators.len(), 2);
+	});
+}

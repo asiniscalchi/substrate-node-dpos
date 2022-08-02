@@ -191,7 +191,7 @@ pub mod pallet {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {}", new_index);
 
-			let winners: Vec<T::AccountId> = <Bonded<T>>::iter_keys().collect::<Vec<T::AccountId>>().try_into().unwrap();
+			let mut winners: Vec<T::AccountId> = <Bonded<T>>::iter_keys().collect::<Vec<T::AccountId>>().try_into().unwrap();
 			let min_validator_count  = <MinimumValidatorCount<T>>::get();
 
 			if winners.len() <  min_validator_count as usize {
@@ -200,6 +200,7 @@ pub mod pallet {
 			}
 
 			log!(info, "planning new session ids: {:?}", winners);
+			winners.truncate(<MaximumValidatorCount<T>>::get() as usize);
 			Some(winners)
 		}
 
