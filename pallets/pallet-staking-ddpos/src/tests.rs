@@ -183,3 +183,21 @@ fn users_should_vote_once() {
 		assert_noop!(Staking::vote(Origin::signed(ALICE), CHARLIE), Error::<Test>::AlreadyVoted);
 	});
 }
+
+#[test]
+fn user_should_be_able_to_unvote_always() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+	});
+}
+
+#[test]
+fn users_could_revote_after_unvote() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE));
+	});
+}

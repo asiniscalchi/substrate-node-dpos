@@ -206,6 +206,19 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn unvote(origin: OriginFor<T>) -> DispatchResult {
+			let voter = ensure_signed(origin)?;
+
+			if !<Voted<T>>::contains_key(&voter) {
+				return Ok(());
+			}
+
+			<Voted<T>>::remove(&voter);
+
+			Ok(())
+		}
 	}
 
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
