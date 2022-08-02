@@ -163,3 +163,15 @@ fn new_session_should_return_at_maximum_maximum_validator() {
 		assert_eq!(validators.len(), 2);
 	});
 }
+
+#[test]
+fn new_session_should_return_the_winners() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Staking::maximum_validator_count(), 2);
+		assert_ok!(Staking::bond(Origin::signed(BOB), 20));
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 50));
+		assert_ok!(Staking::bond(Origin::signed(CHARLIE), 90));
+		let validators = Staking::new_session(1);
+		assert_eq!(validators, Some(vec![CHARLIE, ALICE]));
+	});
+}

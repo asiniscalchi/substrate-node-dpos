@@ -191,8 +191,18 @@ pub mod pallet {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(info, "planning new session {}", new_index);
 
-			let mut winners: Vec<T::AccountId> = <Bonded<T>>::iter_keys().collect::<Vec<T::AccountId>>().try_into().unwrap();
 			let min_validator_count  = <MinimumValidatorCount<T>>::get();
+			let max_validator_count  = <MaximumValidatorCount<T>>::get();
+
+			let mut ciao: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
+			println!("{:?}", ciao);
+			ciao.sort_by(|a, b| b.1.cmp(&a.1));
+			ciao.truncate(max_validator_count as usize);
+
+			let mut winners : Vec<T::AccountId> = Vec::new();
+			for i in ciao {
+				winners.push(i.0);
+			}
 
 			if winners.len() <  min_validator_count as usize {
 				log!(warn, "validators count {} less than the minimum {}", winners.len(), min_validator_count);
@@ -200,7 +210,6 @@ pub mod pallet {
 			}
 
 			log!(info, "planning new session ids: {:?}", winners);
-			winners.truncate(<MaximumValidatorCount<T>>::get() as usize);
 			Some(winners)
 		}
 
