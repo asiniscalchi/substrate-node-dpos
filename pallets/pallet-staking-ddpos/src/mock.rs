@@ -87,8 +87,10 @@ pub const CHARLIE: u64 = 3;
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut storage = system::GenesisConfig::default().build_storage::<Test>().unwrap();
-	let _ = pallet_balances::GenesisConfig::<Test> { balances: vec![(ALICE, 100), (BOB, 100), (CHARLIE, 100)] }
-		.assimilate_storage(&mut storage);
+	let _ = pallet_balances::GenesisConfig::<Test> {
+		balances: vec![(ALICE, 100), (BOB, 100), (CHARLIE, 100)],
+	}
+	.assimilate_storage(&mut storage);
 
 	storage.into()
 }

@@ -282,7 +282,7 @@ impl pallet_staking_ddpos::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
 	type MinimumValidatorCount = ConstU32<1>;
-	type MaximumValidatorCount =  ConstU32<2>;
+	type MaximumValidatorCount = ConstU32<2>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

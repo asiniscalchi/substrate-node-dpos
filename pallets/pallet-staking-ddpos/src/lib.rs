@@ -135,6 +135,8 @@ pub mod pallet {
 				return Err(Error::<T>::InsufficientBond.into());
 			}
 
+			frame_system::Pallet::<T>::inc_consumers(&stash).map_err(|_| Error::<T>::BadState)?;
+
 			let stash_balance = T::Currency::free_balance(&stash);
 			let value = value.min(stash_balance);
 			T::Currency::set_lock(STAKING_ID, &stash, value, WithdrawReasons::all());
@@ -156,6 +158,9 @@ pub mod pallet {
 			}
 
 			T::Currency::remove_lock(STAKING_ID, &stash);
+
+			frame_system::Pallet::<T>::dec_consumers(&stash);
+
 			Self::deposit_event(Event::<T>::Unbonded(stash));
 
 			Ok(())
@@ -165,8 +170,8 @@ pub mod pallet {
 		pub fn set_minimum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
 			ensure_root(origin)?;
 			if value == 0 || value > <MaximumValidatorCount<T>>::get() {
-				return Err(Error::<T>::InvalidNumberOfNominations.into());	
-			} 
+				return Err(Error::<T>::InvalidNumberOfNominations.into());
+			}
 			<MinimumValidatorCount<T>>::set(value);
 			Ok(())
 		}
@@ -175,7 +180,7 @@ pub mod pallet {
 		pub fn set_maximum_validator_count(origin: OriginFor<T>, value: u32) -> DispatchResult {
 			ensure_root(origin)?;
 			if value < <MinimumValidatorCount<T>>::get() {
-				return Err(Error::<T>::InvalidNumberOfNominations.into());	
+				return Err(Error::<T>::InvalidNumberOfNominations.into());
 			}
 			<MaximumValidatorCount<T>>::set(value);
 			Ok(())
@@ -191,19 +196,24 @@ pub mod pallet {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(debug, "planning new session {}", new_index);
 
-			let min_validator_count  = <MinimumValidatorCount<T>>::get();
-			let max_validator_count  = <MaximumValidatorCount<T>>::get();
+			let min_validator_count = <MinimumValidatorCount<T>>::get();
+			let max_validator_count = <MaximumValidatorCount<T>>::get();
 
 			let mut validators: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
-			if validators.len() <  min_validator_count as usize {
-				log!(warn, "validators count {} less than the minimum {} ... skip", validators.len(), min_validator_count);
-				return None
+			if validators.len() < min_validator_count as usize {
+				log!(
+					warn,
+					"validators count {} less than the minimum {} ... skip",
+					validators.len(),
+					min_validator_count
+				);
+				return None;
 			}
 
 			validators.sort_by(|a, b| b.1.cmp(&a.1));
 			validators.truncate(max_validator_count as usize);
 
-			let mut winners : Vec<T::AccountId> = Vec::new();
+			let mut winners: Vec<T::AccountId> = Vec::new();
 			for i in validators {
 				winners.push(i.0);
 			}
