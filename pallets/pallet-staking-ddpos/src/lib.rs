@@ -77,7 +77,7 @@ pub mod pallet {
 	/// Map from all locked "stash" accounts to the controller account.
 	#[pallet::storage]
 	#[pallet::getter(fn bonded)]
-	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
+	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
 
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
@@ -139,7 +139,7 @@ pub mod pallet {
 			let value = value.min(stash_balance);
 			T::Currency::set_lock(STAKING_ID, &stash, value, WithdrawReasons::all());
 
-			<Bonded<T>>::insert(&stash, &());
+			<Bonded<T>>::insert(&stash, value);
 
 			Self::deposit_event(Event::<T>::Bonded(stash, value));
 
