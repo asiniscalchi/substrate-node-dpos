@@ -103,6 +103,10 @@ pub mod pallet {
 		Bonded(T::AccountId, BalanceOf<T>),
 		/// An account has unbonded
 		Unbonded(T::AccountId),
+		// An user voted
+		Voted(T::AccountId, T::AccountId),
+		// An user unvoted
+		Unvoted(T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -202,7 +206,9 @@ pub mod pallet {
 				return Err(Error::<T>::AlreadyVoted.into());
 			}
 
-			<Voted<T>>::insert(&voter, target);
+			<Voted<T>>::insert(&voter, &target);
+
+			Self::deposit_event(Event::<T>::Voted(voter, target));
 
 			Ok(())
 		}
@@ -216,6 +222,8 @@ pub mod pallet {
 			}
 
 			<Voted<T>>::remove(&voter);
+
+			Self::deposit_event(Event::<T>::Unvoted(voter));
 
 			Ok(())
 		}
