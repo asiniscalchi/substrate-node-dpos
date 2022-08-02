@@ -201,3 +201,20 @@ fn users_could_revote_after_unvote() {
 		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE));
 	});
 }
+
+#[test]
+fn vote_should_set_the_vote_target() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_eq!(Staking::voted(ALICE), Some(BOB));
+	});
+}
+
+#[test]
+fn unvote_should_remove_the_vote_target() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_eq!(Staking::voted(ALICE), None);
+	});
+}

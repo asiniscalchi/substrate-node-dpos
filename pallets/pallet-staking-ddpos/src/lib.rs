@@ -82,7 +82,7 @@ pub mod pallet {
 	/// Map from all locked "stash" accounts to the controller account.
 	#[pallet::storage]
 	#[pallet::getter(fn voted)]
-	pub type Voted<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, ()>;
+	pub type Voted<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, T::AccountId>;
 
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
@@ -202,7 +202,7 @@ pub mod pallet {
 				return Err(Error::<T>::AlreadyVoted.into());
 			}
 
-			<Voted<T>>::insert(&voter, ());
+			<Voted<T>>::insert(&voter, target);
 
 			Ok(())
 		}
