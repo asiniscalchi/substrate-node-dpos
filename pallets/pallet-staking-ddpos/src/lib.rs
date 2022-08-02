@@ -114,6 +114,8 @@ pub mod pallet {
 		BadState,
 		/// Invalid number of validators.
 		InvalidNumberOfValidators,
+
+		AlreadyVoted,
 	}
 
 	#[pallet::call]
@@ -183,6 +185,17 @@ pub mod pallet {
 				return Err(Error::<T>::InvalidNumberOfValidators.into());
 			}
 			<MaximumValidatorCount<T>>::set(value);
+			Ok(())
+		}
+
+// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
+		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		pub fn vote(
+			origin: OriginFor<T>,
+			target: T::AccountId,
+		) -> DispatchResult {
+			let controller = ensure_signed(origin)?;
+			 
 			Ok(())
 		}
 	}

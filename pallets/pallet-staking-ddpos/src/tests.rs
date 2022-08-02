@@ -116,12 +116,12 @@ fn set_minimum_should_not_0_and_major_than_maximum() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
 			Staking::set_minimum_validator_count(Origin::root(), 0),
-			Error::<Test>::InvalidNumberOfNominations
+			Error::<Test>::InvalidNumberOfValidators
 		);
 		let counter = Staking::maximum_validator_count();
 		assert_noop!(
 			Staking::set_minimum_validator_count(Origin::root(), counter + 1),
-			Error::<Test>::InvalidNumberOfNominations
+			Error::<Test>::InvalidNumberOfValidators
 		);
 		assert_ok!(Staking::set_minimum_validator_count(Origin::root(), counter));
 	});
@@ -146,7 +146,7 @@ fn set_maximum_should_not_be_minor_than_minimum() {
 		let counter = Staking::minimum_validator_count();
 		assert_noop!(
 			Staking::set_maximum_validator_count(Origin::root(), counter - 1),
-			Error::<Test>::InvalidNumberOfNominations
+			Error::<Test>::InvalidNumberOfValidators
 		);
 		assert_ok!(Staking::set_maximum_validator_count(Origin::root(), counter));
 	});
@@ -173,5 +173,13 @@ fn new_session_should_return_the_winners() {
 		assert_ok!(Staking::bond(Origin::signed(CHARLIE), 90));
 		let validators = Staking::new_session(1);
 		assert_eq!(validators, Some(vec![CHARLIE, ALICE]));
+	});
+}
+
+#[test]
+fn validators_should_not_vote() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 50));
+		assert_noop!(Staking::vote(Origin::signed(ALICE), BOB), Error::<Test>::AlreadyVoted);
 	});
 }
