@@ -194,18 +194,18 @@ pub mod pallet {
 			let min_validator_count  = <MinimumValidatorCount<T>>::get();
 			let max_validator_count  = <MaximumValidatorCount<T>>::get();
 
-			let mut ciao: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
-			ciao.sort_by(|a, b| b.1.cmp(&a.1));
-			ciao.truncate(max_validator_count as usize);
-
-			let mut winners : Vec<T::AccountId> = Vec::new();
-			for i in ciao {
-				winners.push(i.0);
+			let mut validators: Vec<(T::AccountId, BalanceOf<T>)> = <Bonded<T>>::iter().collect();
+			if validators.len() <  min_validator_count as usize {
+				log!(warn, "validators count {} less than the minimum {}", validators.len(), min_validator_count);
+				return None
 			}
 
-			if winners.len() <  min_validator_count as usize {
-				log!(warn, "validators count {} less than the minimum {}", winners.len(), min_validator_count);
-				return None
+			validators.sort_by(|a, b| b.1.cmp(&a.1));
+			validators.truncate(max_validator_count as usize);
+
+			let mut winners : Vec<T::AccountId> = Vec::new();
+			for i in validators {
+				winners.push(i.0);
 			}
 
 			log!(info, "planning new session ids: {:?}", winners);
