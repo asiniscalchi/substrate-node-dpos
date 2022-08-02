@@ -187,11 +187,6 @@ pub mod pallet {
 		}
 	}
 
-	/// In this implementation `new_session(session)` must be called before `end_session(session-1)`
-	/// i.e. the new session must be planned before the ending of the previous session.
-	///
-	/// Once the first new_session is planned, all session must start and then end in order, though
-	/// some session can lag in between the newest session planned and the latest session started.
 	impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 		fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
 			log!(debug, "planning new session {}", new_index);
