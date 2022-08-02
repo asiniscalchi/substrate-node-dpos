@@ -3804,6 +3804,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
  "pallet-session",
+ "pallet-staking",
  "pallet-staking-ddpos",
  "pallet-sudo",
  "pallet-template",
