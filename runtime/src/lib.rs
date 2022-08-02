@@ -47,7 +47,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-pub use pallet_staking_ddpos;
+pub use pallet_staking_dpos;
 /// Import the template pallet.
 pub use pallet_template;
 
@@ -267,11 +267,6 @@ impl pallet_sudo::Config for Runtime {
 	type Call = Call;
 }
 
-/// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
-}
-
 impl pallet_session::Config for Runtime {
 	type Event = Event;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
@@ -284,7 +279,7 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_staking_ddpos::Config for Runtime {
+impl pallet_staking_dpos::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type CurrencyBalance = Balance;
@@ -309,8 +304,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		Session: pallet_session,
 		// Include the custom logic from the pallet-template in the runtime.
-		TemplateModule: pallet_template,
-		Staking: pallet_staking_ddpos,
+		Staking: pallet_staking_dpos,
 	}
 );
 
