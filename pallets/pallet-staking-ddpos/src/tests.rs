@@ -179,8 +179,8 @@ fn new_session_should_return_the_winners() {
 #[test]
 fn users_should_vote_once() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
-		assert_noop!(Staking::vote(Origin::signed(ALICE), CHARLIE), Error::<Test>::AlreadyVoted);
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
+		assert_noop!(Staking::vote(Origin::signed(ALICE), CHARLIE, 0), Error::<Test>::AlreadyVoted);
 	});
 }
 
@@ -196,16 +196,16 @@ fn user_should_be_able_to_unvote_always() {
 #[test]
 fn users_could_revote_after_unvote() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
-		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE, 0));
 	});
 }
 
 #[test]
 fn vote_should_set_the_vote_target() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_eq!(Staking::voted(ALICE), Some(BOB));
 	});
 }
@@ -213,7 +213,7 @@ fn vote_should_set_the_vote_target() {
 #[test]
 fn unvote_should_remove_the_vote_target() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
 		assert_eq!(Staking::voted(ALICE), None);
 	});
@@ -223,7 +223,7 @@ fn unvote_should_remove_the_vote_target() {
 fn success_vote_should_raise_an_event() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB),]);
 	});
 }
@@ -234,7 +234,7 @@ fn success_unvote_should_raise_an_event() {
 		System::set_block_number(1);
 		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
 		assert_eq!(staking_events(), vec![]);
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB),]);
 		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB), Event::Unvoted(ALICE)]);
@@ -248,7 +248,7 @@ fn validators_with_same_stack_should_win_with_more_votes() {
 		assert_ok!(Staking::bond(Origin::signed(ALICE), 20));
 		assert_ok!(Staking::bond(Origin::signed(BOB), 20));
 		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
-		assert_ok!(Staking::vote(Origin::signed(CHARLIE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(CHARLIE), BOB, 10));
 		assert_eq!(Staking::new_session(0), Some(vec![BOB, ALICE]));
 	});
 }

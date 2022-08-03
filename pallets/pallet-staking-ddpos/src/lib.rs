@@ -88,7 +88,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn ratings)]
 	pub type Ratings<T: Config> =
-		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, ()>;
+		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, BalanceOf<T>>;
 
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
@@ -205,7 +205,7 @@ pub mod pallet {
 
 		// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn vote(origin: OriginFor<T>, target: T::AccountId) -> DispatchResult {
+		pub fn vote(origin: OriginFor<T>, target: T::AccountId, value: BalanceOf<T>) -> DispatchResult {
 			let voter = ensure_signed(origin)?;
 
 			if <Voted<T>>::contains_key(&voter) {
@@ -213,7 +213,7 @@ pub mod pallet {
 			}
 
 			<Voted<T>>::insert(&voter, &target);
-			<Ratings<T>>::insert(&target, &voter, ());
+			<Ratings<T>>::insert(&target, &voter, value);
 
 			Self::deposit_event(Event::<T>::Voted(voter, target));
 
@@ -257,7 +257,7 @@ pub mod pallet {
 
 			for i in validators.iter_mut() {
 				for j in <Ratings<T>>::iter_prefix_values(&i.0) {
-					i.1 = i.1 + 1;
+					i.1 = i.1 + j;
 				}
 			}
 
