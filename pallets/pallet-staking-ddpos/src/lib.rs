@@ -29,7 +29,9 @@ macro_rules! log {
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::{Currency, LockIdentifier, LockableCurrency, WithdrawReasons};
+	use frame_support::traits::{
+		Currency, LockIdentifier, LockableCurrency, ReservableCurrency, WithdrawReasons,
+	};
 	use frame_system::{ensure_root, pallet_prelude::*};
 	use sp_staking::SessionIndex;
 	use sp_std::vec::Vec;
@@ -44,10 +46,10 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// The staking balance.
 		type Currency: LockableCurrency<
-			Self::AccountId,
-			Moment = Self::BlockNumber,
-			Balance = Self::CurrencyBalance,
-		>;
+				Self::AccountId,
+				Moment = Self::BlockNumber,
+				Balance = Self::CurrencyBalance,
+			> + ReservableCurrency<Self::AccountId>;
 		/// Just the `Currency::Balance` type; we have this item to allow us to constrain it to
 		/// `From<u64>`.
 		type CurrencyBalance: sp_runtime::traits::AtLeast32BitUnsigned
@@ -215,6 +217,9 @@ pub mod pallet {
 			if <UserValidator<T>>::contains_key(&voter, &target) {
 				return Err(Error::<T>::AlreadyVoted.into());
 			}
+
+			T::Currency::reserve(&voter, value)?;
+
 			<UserValidator<T>>::insert(&voter, &target, &value);
 
 			let stake = <Staked<T>>::get(&target);
@@ -236,7 +241,10 @@ pub mod pallet {
 				return Ok(());
 			}
 
+
 			let staked = <UserValidator<T>>::take(&voter, &target).expect("alredy checked");
+
+			T::Currency::unreserve(&voter, staked);
 
 			let stake = <Staked<T>>::get(&target).expect("already checked");
 			<Staked<T>>::insert(&target, stake - staked);
@@ -268,7 +276,7 @@ pub mod pallet {
 			for i in validators.iter_mut() {
 				let stake = <Staked<T>>::get(&i.0);
 				match stake {
-					Some(x) => {i.1 = i.1 + x},
+					Some(x) => i.1 = i.1 + x,
 					None => (),
 				};
 			}
