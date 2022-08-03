@@ -229,6 +229,33 @@ fn success_vote_should_raise_an_event() {
 }
 
 #[test]
+fn balance_reserve_shluld_be_handled_correctly() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		assert_noop!(
+			Staking::vote(Origin::signed(ALICE), BOB, 1000),
+			frame_support::dispatch::DispatchError::Module(sp_runtime::ModuleError {
+				index: 2,
+				error: [2, 0, 0, 0],
+				message: Some("InsufficientBalance")
+			})
+		);
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 100));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE, 0));
+		assert_noop!(
+			Staking::vote(Origin::signed(ALICE), ALICE, 1),
+			frame_support::dispatch::DispatchError::Module(sp_runtime::ModuleError {
+				index: 2,
+				error: [2, 0, 0, 0],
+				message: Some("InsufficientBalance")
+			})
+		);
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), ALICE, 100));
+	});
+}
+
+#[test]
 fn success_unvote_should_raise_an_event() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);

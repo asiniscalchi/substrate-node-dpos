@@ -241,7 +241,6 @@ pub mod pallet {
 				return Ok(());
 			}
 
-
 			let staked = <UserValidator<T>>::take(&voter, &target).expect("alredy checked");
 
 			T::Currency::unreserve(&voter, staked);
