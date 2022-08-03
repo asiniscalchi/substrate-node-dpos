@@ -39,6 +39,7 @@ sp-std = { version = "4.0.0-dev", default-features = false, git = "https://githu
 sp-transaction-pool = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 sp-version = { version = "5.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 pallet-session = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
+pallet-staking-ddpos = { version = "0.0.1-dev", default-features = false, git = "https://github.com/asiniscalchi/pallet-staking-ddpos.git" }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
@@ -48,9 +49,6 @@ pallet-transaction-payment-rpc-runtime-api = { version = "4.0.0-dev", default-fe
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", optional = true }
 frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", optional = true }
 hex-literal = { version = "0.3.4", optional = true }
-
-# Local Dependencies
-pallet-staking-ddpos = { version = "4.0.0-dev", default-features = false, path = "../pallets/pallet-staking-ddpos" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
