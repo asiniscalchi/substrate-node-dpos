@@ -110,9 +110,9 @@ pub mod pallet {
 		/// An account has unbonded
 		Unbonded(T::AccountId),
 		// An user voted
-		Voted(T::AccountId, T::AccountId),
+		Voted(T::AccountId, T::AccountId, BalanceOf<T>),
 		// An user unvoted
-		Unvoted(T::AccountId),
+		Unvoted(T::AccountId, T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -223,7 +223,7 @@ pub mod pallet {
 				None => <Staked<T>>::insert(&target, value),
 			}
 
-			Self::deposit_event(Event::<T>::Voted(voter, target));
+			Self::deposit_event(Event::<T>::Voted(voter, target, value));
 
 			Ok(())
 		}
@@ -241,7 +241,7 @@ pub mod pallet {
 			let stake = <Staked<T>>::get(&target).expect("already checked");
 			<Staked<T>>::insert(&target, stake - staked);
 
-			Self::deposit_event(Event::<T>::Unvoted(voter));
+			Self::deposit_event(Event::<T>::Unvoted(voter, target));
 
 			Ok(())
 		}

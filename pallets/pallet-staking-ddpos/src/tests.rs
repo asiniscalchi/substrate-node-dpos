@@ -223,8 +223,8 @@ fn unvote_should_remove_the_vote_target() {
 fn success_vote_should_raise_an_event() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB),]);
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 10));
+		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB, 10),]);
 	});
 }
 
@@ -235,9 +235,9 @@ fn success_unvote_should_raise_an_event() {
 		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 		assert_eq!(staking_events(), vec![]);
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB),]);
+		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB, 0),]);
 		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
-		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB), Event::Unvoted(ALICE)]);
+		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB, 0), Event::Unvoted(ALICE, BOB)]);
 	});
 }
 
