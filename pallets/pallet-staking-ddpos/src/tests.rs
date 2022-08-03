@@ -177,10 +177,10 @@ fn new_session_should_return_the_winners() {
 }
 
 #[test]
-fn users_should_vote_once() {
+fn users_should_vote_once_for_same_validator() {
 	new_test_ext().execute_with(|| {
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_noop!(Staking::vote(Origin::signed(ALICE), CHARLIE, 0), Error::<Test>::AlreadyVoted);
+		assert_noop!(Staking::vote(Origin::signed(ALICE), BOB, 0), Error::<Test>::AlreadyVoted);
 	});
 }
 
@@ -205,8 +205,8 @@ fn users_could_revote_after_unvote() {
 #[test]
 fn vote_should_set_the_vote_target() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_eq!(Staking::voted(ALICE), Some(BOB));
+		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 10));
+		assert_eq!(Staking::user_validator(ALICE, BOB), Some(10));
 	});
 }
 
@@ -215,7 +215,7 @@ fn unvote_should_remove_the_vote_target() {
 	new_test_ext().execute_with(|| {
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
-		assert_eq!(Staking::voted(ALICE), None);
+		assert_eq!(Staking::user_validator(ALICE, BOB), None);
 	});
 }
 

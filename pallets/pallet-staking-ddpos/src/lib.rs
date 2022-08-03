@@ -79,11 +79,6 @@ pub mod pallet {
 	#[pallet::getter(fn bonded)]
 	pub type Bonded<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
 
-	/// Map from all locked "stash" accounts to the controller account.
-	#[pallet::storage]
-	#[pallet::getter(fn voted)]
-	pub type Voted<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, T::AccountId>;
-
 	/// DoubleMap from all the "stash", "user", ratings.
 	#[pallet::storage]
 	#[pallet::getter(fn user_validator)]
@@ -94,12 +89,6 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn staked)]
 	pub type Staked<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
-
-	/// DoubleMap from all the "stash", "user", ratings.
-	#[pallet::storage]
-	#[pallet::getter(fn ratings)]
-	pub type Ratings<T: Config> =
-		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, BalanceOf<T>>;
 
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
@@ -223,13 +212,6 @@ pub mod pallet {
 		) -> DispatchResult {
 			let voter = ensure_signed(origin)?;
 
-			if <Voted<T>>::contains_key(&voter) {
-				return Err(Error::<T>::AlreadyVoted.into());
-			}
-
-			<Voted<T>>::insert(&voter, &target);
-			<Ratings<T>>::insert(&target, &voter, &value);
-
 			if <UserValidator<T>>::contains_key(&voter, &target) {
 				return Err(Error::<T>::AlreadyVoted.into());
 			}
@@ -249,13 +231,6 @@ pub mod pallet {
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
 		pub fn unvote(origin: OriginFor<T>, target: T::AccountId) -> DispatchResult {
 			let voter = ensure_signed(origin)?;
-
-			if !<Voted<T>>::contains_key(&voter) {
-				return Ok(());
-			}
-
-			let target = <Voted<T>>::take(&voter).expect("checked before");
-			<Ratings<T>>::remove(&target, &voter);
 
 			if !<UserValidator<T>>::contains_key(&voter, &target) {
 				return Ok(());
@@ -291,9 +266,11 @@ pub mod pallet {
 			}
 
 			for i in validators.iter_mut() {
-				for j in <Ratings<T>>::iter_prefix_values(&i.0) {
-					i.1 = i.1 + j;
-				}
+				let stake = <Staked<T>>::get(&i.0);
+				match stake {
+					Some(x) => {i.1 = i.1 + x},
+					None => (),
+				};
 			}
 
 			validators.sort_by(|a, b| b.1.cmp(&a.1));
