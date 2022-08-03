@@ -18,13 +18,13 @@ the script runs the node with _--log runtime::dpos_ so it is possible to see the
  ## usage
  At the beginning there's no validator bonded in the DPOS staking pallet: the BP are the one created in genesis.
  
- * **bond**(ALICE_SLASH): ALICE_SLASH will start producing blocks alone
+ * **bond**(ALICE_STASH): ALICE_STASH will start producing blocks alone
 
-* **bond**(BOB_SLASH): ALICE_SLASH and BOB_SLASH will produce blocks
+* **bond**(BOB_STASH): ALICE_STASH and BOB_STASH will produce blocks
 
 * **set_maximum_validators**(1): the validator with more stake will produce blocks
 
-* **vote**(ALICE_SLASH or BOB_SLASH): to change the winner
+* **vote**(ALICE_STASH or BOB_STASH): to change the winner
 
 other extrinsics for **set_minimum_validators, unbond, unvote** are provided.
 
