@@ -84,6 +84,12 @@ pub mod pallet {
 	#[pallet::getter(fn voted)]
 	pub type Voted<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, T::AccountId>;
 
+	/// DoubleMap from all the "stash", "user", ratings.
+	#[pallet::storage]
+	#[pallet::getter(fn ratings)]
+	pub type Ratings<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, ()>;
+
 	/// Minimum number of staking participants before emergency conditions are imposed.
 	#[pallet::storage]
 	#[pallet::getter(fn minimum_validator_count)]
@@ -207,6 +213,7 @@ pub mod pallet {
 			}
 
 			<Voted<T>>::insert(&voter, &target);
+			<Ratings<T>>::insert(&target, &voter, ());
 
 			Self::deposit_event(Event::<T>::Voted(voter, target));
 
@@ -221,7 +228,8 @@ pub mod pallet {
 				return Ok(());
 			}
 
-			<Voted<T>>::remove(&voter);
+			let target = <Voted<T>>::take(&voter).expect("checked before");
+			<Ratings<T>>::remove(&target, &voter);
 
 			Self::deposit_event(Event::<T>::Unvoted(voter));
 
@@ -245,6 +253,12 @@ pub mod pallet {
 					min_validator_count
 				);
 				return None;
+			}
+
+			for i in validators.iter_mut() {
+				for j in <Ratings<T>>::iter_prefix_values(&i.0) {
+					i.1 = i.1 + 1;
+				}
 			}
 
 			validators.sort_by(|a, b| b.1.cmp(&a.1));

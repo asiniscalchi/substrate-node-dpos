@@ -240,3 +240,15 @@ fn success_unvote_should_raise_an_event() {
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB), Event::Unvoted(ALICE)]);
 	});
 }
+
+#[test]
+fn validators_with_same_stack_should_win_with_more_votes() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Staking::bond(Origin::signed(ALICE), 20));
+		assert_ok!(Staking::bond(Origin::signed(BOB), 20));
+		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
+		assert_ok!(Staking::vote(Origin::signed(CHARLIE), BOB));
+		assert_eq!(Staking::new_session(0), Some(vec![BOB, ALICE]));
+	});
+}
