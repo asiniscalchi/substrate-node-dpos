@@ -250,5 +250,7 @@ fn validators_with_same_stack_should_win_with_more_votes() {
 		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
 		assert_ok!(Staking::vote(Origin::signed(CHARLIE), BOB, 10));
 		assert_eq!(Staking::new_session(0), Some(vec![BOB, ALICE]));
+		assert_ok!(Staking::vote(Origin::signed(CHARLIE), ALICE, 11));
+		assert_eq!(Staking::new_session(0), Some(vec![ALICE, BOB]));
 	});
 }
