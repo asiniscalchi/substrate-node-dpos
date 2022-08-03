@@ -86,6 +86,17 @@ pub mod pallet {
 
 	/// DoubleMap from all the "stash", "user", ratings.
 	#[pallet::storage]
+	#[pallet::getter(fn user_validator)]
+	pub type UserValidator<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, BalanceOf<T>>;
+
+	/// Map from all locked "stash" accounts to the controller account.
+	#[pallet::storage]
+	#[pallet::getter(fn staked)]
+	pub type Staked<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, BalanceOf<T>>;
+
+	/// DoubleMap from all the "stash", "user", ratings.
+	#[pallet::storage]
 	#[pallet::getter(fn ratings)]
 	pub type Ratings<T: Config> =
 		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::AccountId, BalanceOf<T>>;
@@ -205,7 +216,11 @@ pub mod pallet {
 
 		// #[pallet::weight(T::WeightInfo::nominate(targets.len() as u32))]
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn vote(origin: OriginFor<T>, target: T::AccountId, value: BalanceOf<T>) -> DispatchResult {
+		pub fn vote(
+			origin: OriginFor<T>,
+			target: T::AccountId,
+			value: BalanceOf<T>,
+		) -> DispatchResult {
 			let voter = ensure_signed(origin)?;
 
 			if <Voted<T>>::contains_key(&voter) {
@@ -213,7 +228,18 @@ pub mod pallet {
 			}
 
 			<Voted<T>>::insert(&voter, &target);
-			<Ratings<T>>::insert(&target, &voter, value);
+			<Ratings<T>>::insert(&target, &voter, &value);
+
+			if <UserValidator<T>>::contains_key(&voter, &target) {
+				return Err(Error::<T>::AlreadyVoted.into());
+			}
+			<UserValidator<T>>::insert(&voter, &target, &value);
+
+			let stake = <Staked<T>>::get(&target);
+			match stake {
+				Some(x) => <Staked<T>>::insert(&target, x + value),
+				None => <Staked<T>>::insert(&target, value),
+			}
 
 			Self::deposit_event(Event::<T>::Voted(voter, target));
 
@@ -221,7 +247,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn unvote(origin: OriginFor<T>) -> DispatchResult {
+		pub fn unvote(origin: OriginFor<T>, target: T::AccountId) -> DispatchResult {
 			let voter = ensure_signed(origin)?;
 
 			if !<Voted<T>>::contains_key(&voter) {
@@ -230,6 +256,15 @@ pub mod pallet {
 
 			let target = <Voted<T>>::take(&voter).expect("checked before");
 			<Ratings<T>>::remove(&target, &voter);
+
+			if !<UserValidator<T>>::contains_key(&voter, &target) {
+				return Ok(());
+			}
+
+			let staked = <UserValidator<T>>::take(&voter, &target).expect("alredy checked");
+
+			let stake = <Staked<T>>::get(&target).expect("already checked");
+			<Staked<T>>::insert(&target, stake - staked);
 
 			Self::deposit_event(Event::<T>::Unvoted(voter));
 

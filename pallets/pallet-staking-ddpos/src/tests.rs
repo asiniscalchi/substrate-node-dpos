@@ -187,9 +187,9 @@ fn users_should_vote_once() {
 #[test]
 fn user_should_be_able_to_unvote_always() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), CHARLIE));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 	});
 }
 
@@ -197,7 +197,7 @@ fn user_should_be_able_to_unvote_always() {
 fn users_could_revote_after_unvote() {
 	new_test_ext().execute_with(|| {
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 		assert_ok!(Staking::vote(Origin::signed(ALICE), CHARLIE, 0));
 	});
 }
@@ -214,7 +214,7 @@ fn vote_should_set_the_vote_target() {
 fn unvote_should_remove_the_vote_target() {
 	new_test_ext().execute_with(|| {
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 		assert_eq!(Staking::voted(ALICE), None);
 	});
 }
@@ -232,11 +232,11 @@ fn success_vote_should_raise_an_event() {
 fn success_unvote_should_raise_an_event() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 		assert_eq!(staking_events(), vec![]);
 		assert_ok!(Staking::vote(Origin::signed(ALICE), BOB, 0));
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB),]);
-		assert_ok!(Staking::unvote(Origin::signed(ALICE)));
+		assert_ok!(Staking::unvote(Origin::signed(ALICE), BOB));
 		assert_eq!(staking_events(), vec![Event::Voted(ALICE, BOB), Event::Unvoted(ALICE)]);
 	});
 }
