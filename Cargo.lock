@@ -4118,7 +4118,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-ddpos"
 version = "0.0.1-dev"
-source = "git+https://github.com/asiniscalchi/pallet-staking-ddpos.git#2052b3a085b9dd5a837e81d181e23f5ddd944265"
+source = "git+https://github.com/asiniscalchi/pallet-staking-ddpos.git#75d869982b2e3b7ec3d09d04744a6735e873fb2b"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
